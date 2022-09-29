@@ -1,0 +1,13 @@
+parameters:
+    level: 9
+    tmpDir: ~/.cache/php-test-ci/phpstan
+    parallel:
+        jobSize: 20
+        maximumNumberOfProcesses: 32
+        minimumNumberOfJobsPerProcess: 2
+        processTimeout: 120.0
+
+
+includes:
+    - ./vendor/phpstan/phpstan-strict-rules/rules.neon
+

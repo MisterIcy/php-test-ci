@@ -1,0 +1,160 @@
+name: Test CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  lint:
+    name: Lint Codebase (PHP${{matrix.php_versions}})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php_versions: ['7.4', '8.0', '8.1', '8.2']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup PHP ${{matrix.php_versions}}
+        uses: shivammathur/setup-php@v2
+        with:
+          php_version: ${{matrix.php_versions}}
+          extensions: curl, json, opcache, intl, mbstring, gettext
+          coverage: none
+          tools: composer, cs2pr
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{steps.composer-cache.outputs.dir}}
+          key: ${{ runner.os }}-composer-${{ hashFiles('./composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Dependencies
+        run: |
+          composer install
+
+      - name: Lint App
+        run: |
+          ./vendor/bin/parallel-lint --no-colors --no-progress --checkstyle ./src | cs2pr
+
+      - name: Lint Tests
+        run: |
+          ./vendor/bin/parallel-lint --no-colors --no-progress --checkstyle ./tests | cs2pr
+
+  phpstan:
+    name: Static analysis with PHPStan (PHP${{matrix.php_versions}})
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php_versions: ['7.4', '8.0', '8.1', '8.2']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup PHP ${{matrix.php_versions}}
+        uses: shivammathur/setup-php@v2
+        with:
+          php_version: ${{matrix.php_versions}}
+          extensions: curl, json, opcache, intl, mbstring, gettext
+          coverage: none
+          tools: composer, cs2pr
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{steps.composer-cache.outputs.dir}}
+          key: ${{ runner.os }}-composer-${{ hashFiles('./composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Dependencies
+        run: |
+          composer install
+
+      - name: Get PHPStan Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/php-test-ci/phpstan
+          key: ${{runner.os}}-phpstan-${{matrix.php_versions}}-${{github.sha}}
+          restore-keys: |
+            ${{runner.os}}-phpstan-${{matrix.php_versions}}-
+
+      - name: Static Analysis (Core)
+        run: |
+          ./vendor/bin/phpstan analyse -c phpstan.dist.neon
+
+      - name: Static Analysis (Tests)
+        run: |
+          ./vendor/bin/phpstan analyse -c phpstan.tests.neon
+          
+  psalm:
+    needs: lint
+    name: Static Analysis with Psalm (PHP${{{matrix.php_versions}})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php_versions: [ '7.4', '8.0', '8.1', '8.2' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup PHP ${{matrix.php_versions}}
+        uses: shivammathur/setup-php@v2
+        with:
+          php_version: ${{matrix.php_versions}}
+          extensions: curl, json, opcache, intl, mbstring, gettext
+          coverage: none
+          tools: composer, cs2pr
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{steps.composer-cache.outputs.dir}}
+          key: ${{ runner.os }}-composer-${{ hashFiles('./composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Get Psalm Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/php-test-ci/psalm
+          key: ${{runner.os}}-psalm-${{matrix.php_versions}}-${{github.sha}}
+          restore-keys: |
+            ${{runner.os}}-psalm-${{matrix.php_versions}}-
+
+      - name: Install Dependencies
+        run: |
+          composer install
+
+      - name: Run Psalm (Core)
+        run: |
+          ./vendor/bin/psalm -c psalm.xml
+          

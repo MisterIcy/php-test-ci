@@ -1,0 +1,6 @@
+includes:
+    - ./phpstan.common.neon
+parameters:
+    paths:
+        - ./tests
+    tmpDir: ~/.cache/php-test-ci/phpstan-tests
