@@ -13,7 +13,7 @@ on:
 
 jobs:
   lint:
-    name: Lint Codebase (PHP${{matrix.php_versions}})
+    name: Lint Codebase (PHP ${{matrix.php_versions}})
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -57,7 +57,7 @@ jobs:
           ./vendor/bin/parallel-lint --no-colors --no-progress --checkstyle ./tests | cs2pr
 
   phpstan:
-    name: Static analysis with PHPStan (PHP${{matrix.php_versions}})
+    name: Static analysis with PHPStan (PHP ${{matrix.php_versions}})
     needs: lint
     runs-on: ubuntu-latest
     strategy:
@@ -111,7 +111,7 @@ jobs:
           
   psalm:
     needs: lint
-    name: Static Analysis with Psalm (PHP${{{matrix.php_versions}})
+    name: Static Analysis with Psalm (PHP ${{matrix.php_versions}})
     runs-on: ubuntu-latest
     strategy:
       matrix:
