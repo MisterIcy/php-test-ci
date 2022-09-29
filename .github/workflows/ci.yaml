@@ -17,7 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php_versions: ['7.4', '8.0', '8.1', '8.2']
+        #php_versions: ['7.4', '8.0', '8.1', '8.2']
+        php_versions: [ '7.4' ]
 
     steps:
       - name: Checkout
@@ -62,7 +63,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php_versions: ['7.4', '8.0', '8.1', '8.2']
+        #php_versions: ['7.4', '8.0', '8.1', '8.2']
+        php_versions: ['7.4']
 
     steps:
       - name: Checkout
@@ -93,10 +95,14 @@ jobs:
         run: |
           composer install
 
+      - name: Create Phpstan Cache Dir
+        run: |
+          mkdir -p .cache/phpstan/{core,tests}
+
       - name: Get PHPStan Cache
         uses: actions/cache@v3
         with:
-          path: ~/.cache/php-test-ci/phpstan
+          path: .cache/phpstan
           key: ${{runner.os}}-phpstan-${{matrix.php_versions}}-${{github.sha}}
           restore-keys: |
             ${{runner.os}}-phpstan-${{matrix.php_versions}}-
@@ -115,7 +121,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php_versions: [ '7.4', '8.0', '8.1', '8.2' ]
+        #php_versions: ['7.4', '8.0', '8.1', '8.2']
+        php_versions: [ '7.4' ]
 
     steps:
       - name: Checkout

@@ -3,4 +3,4 @@ includes:
 parameters:
     paths:
         - ./src
-    tmpDir: ~/.cache/php-test-ci/phpstan-core
+    tmpDir: .cache/phpstan/core

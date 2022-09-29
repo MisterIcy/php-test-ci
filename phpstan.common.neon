@@ -1,6 +1,6 @@
 parameters:
     level: 9
-    tmpDir: ~/.cache/php-test-ci/phpstan
+    tmpDir: .cache/phpstan
     parallel:
         jobSize: 20
         maximumNumberOfProcesses: 32
